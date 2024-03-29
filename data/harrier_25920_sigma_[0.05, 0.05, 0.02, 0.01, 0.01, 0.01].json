@@ -1,0 +1,12 @@
+{
+    "property": {
+        "time_horizon": 200,
+        "infinite_time": false,
+        "type": "reachability",
+        "reach": [
+            25921
+        ]
+    },
+    "satisfaction_mode": "pessimistic",
+    "strategy_mode": "maximize"
+}
