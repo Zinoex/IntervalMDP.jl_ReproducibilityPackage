@@ -13,7 +13,7 @@ Pkg.add("IntervalMDP")
 
 
 ## Running instructions
-We have prepared a Docker image to build and run the experiments including the baseline. To build and run the experiments, excluding our GPU implmentation (see ["Running with NVIDIA GPU"](#running-with-nvidia-gpu)), please clone or copy the source code of [the reproducibility package](https://github.com/Zinoex/IntervalMDP.jl_ReproducibilityPackage). This requires [Git LFS](https://git-lfs.com/) due to the large data files. Then execute the following two commands from a terminal in the root of the source directory:
+We have prepared a Docker image to build and run the experiments including the baseline. To build and run the experiments, excluding our GPU implmentation (see ["Running with NVIDIA GPU"](#running-with-nvidia-gpu)), please clone or copy the source code of [the reproducibility package](https://github.com/Zinoex/IntervalMDP.jl_ReproducibilityPackage) and execute the following two commands from a terminal in the root of the source directory:
 
 ```sh
 docker build -t intervalmdp-reproducibility-package .
