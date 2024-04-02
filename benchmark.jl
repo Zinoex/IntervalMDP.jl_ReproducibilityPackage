@@ -18,8 +18,17 @@ function setup_prism()
 end
 
 
-function benchmark_bmdp_tool(model, problem; samples=10000, timeout_seconds=5.0)
-    @info "bmdp-tool"
+function read_problem(model)
+    model_path = joinpath(@__DIR__, "data", model * ".nc")
+    spec_path = joinpath(@__DIR__, "data", model * ".json")
+    problem = read_intervalmdp_jl(model_path, spec_path)
+
+    return problem
+end
+
+
+function save_bmdp_tool_model(model)
+    problem = read_problem(model)
 
     # Write to bmdp-tool format
     base_path = joinpath(@__DIR__, "data", "bmdp-tool")
@@ -39,7 +48,20 @@ function benchmark_bmdp_tool(model, problem; samples=10000, timeout_seconds=5.0)
     @assert isfinitetime(prop)
     horizon = time_horizon(prop)
 
+    return strat_mode, sat_mode, horizon
+end
+
+
+function benchmark_bmdp_tool(model; samples=10000, timeout_seconds=5.0)
+    @info "bmdp-tool"
+
+    # Write to bmdp-tool format
+    strat_mode, sat_mode, horizon = save_bmdp_tool_model(model)
+
     # Command to run
+    base_path = joinpath(@__DIR__, "data", "bmdp-tool")
+    bmdp_tool_path = joinpath(base_path, model * ".txt")
+
     # Note: when horizon is not -1, then the 4th arg (eps for convergence) is ignored
     bmdp_tool_cmd = `$(@__DIR__)/bmdp-tool/synthesis $strat_mode $sat_mode $horizon 1e-6 $bmdp_tool_path`
 
@@ -49,6 +71,9 @@ function benchmark_bmdp_tool(model, problem; samples=10000, timeout_seconds=5.0)
 
     # Sample
     for i in 1:samples
+        # Run GC to avoid exceeding memory
+        GC.gc()
+
         # Run command
         output = read(bmdp_tool_cmd, String)
         
@@ -74,8 +99,8 @@ function benchmark_bmdp_tool(model, problem; samples=10000, timeout_seconds=5.0)
 end
 
 
-function benchmark_prism(model, problem; samples=10000, timeout_seconds=5.0)
-    @info "PRISM"
+function save_prism_model(model)
+    problem = read_problem(model)
 
     # Write to PRISM format
     base_path = joinpath(@__DIR__, "data", "prism")
@@ -84,13 +109,23 @@ function benchmark_prism(model, problem; samples=10000, timeout_seconds=5.0)
     mkpath(dirname(prism_path))
 
     write_prism_file(prism_path, problem)
+end
+
+
+function benchmark_prism(model; samples=10000, timeout_seconds=5.0)
+    @info "PRISM"
+
+    # Write to PRISM format
+    save_prism_model(model)
 
     # Command to run
+    base_path = joinpath(@__DIR__, "data", "prism")
+
     pctl_path = joinpath(base_path, model * ".pctl")
     prop = read(pctl_path, String)
 
     prism_path = joinpath(base_path, model * ".all")
-    prism_cmd = `$(@__DIR__)/prism-4.8.1-linux64-x86/bin/prism -javamaxmem 12g -importmodel $prism_path -pctl $prop`
+    prism_cmd = `$(@__DIR__)/prism-4.8.1-linux64-x86/bin/prism -javamaxmem 16g -importmodel $prism_path -pctl $prop`
 
     # Execution statistics
     execution_times = Float64[]
@@ -98,6 +133,9 @@ function benchmark_prism(model, problem; samples=10000, timeout_seconds=5.0)
 
     # Sample
     for i in 1:samples
+        # Run GC to avoid exceeding memory
+        GC.gc()
+
         # Run command
         output = read(prism_cmd, String)
 
@@ -123,8 +161,10 @@ function benchmark_prism(model, problem; samples=10000, timeout_seconds=5.0)
 end
 
 
-function benchmark_intervalmdp_cpu(problem; samples=10000, timeout_seconds=5.0)
+function benchmark_intervalmdp_cpu(model; samples=10000, timeout_seconds=5.0)
     @info "IntervalMDP (CPU)"
+
+    problem = read_problem(model)
 
     result = @benchmark value_iteration($problem) samples=samples seconds=timeout_seconds evals=1
 
@@ -135,10 +175,11 @@ function benchmark_intervalmdp_cpu(problem; samples=10000, timeout_seconds=5.0)
 end
 
 
-function benchmark_intervalmdp_gpu(problem; samples=10000, timeout_seconds=5.0)
+function benchmark_intervalmdp_gpu(model; samples=10000, timeout_seconds=5.0)
     if CUDA.functional()
         @info "IntervalMDP (GPU)"
 
+        problem = read_problem(model)
         gpu_problem = IntervalMDP.cu(problem)
 
         result = @benchmark value_iteration($gpu_problem) samples=samples seconds=timeout_seconds evals=1
@@ -152,21 +193,23 @@ function benchmark_intervalmdp_gpu(problem; samples=10000, timeout_seconds=5.0)
     end
 end
 
-
-function benchmark_model(model)
-    # Read model
-    model_path = joinpath(@__DIR__, "data", model * ".nc")
-    spec_path = joinpath(@__DIR__, "data", model * ".json")
-    problem = read_intervalmdp_jl(model_path, spec_path)
+function read_num_transitions(model)
+    problem = read_problem(model)
 
     # NNZ = Number of Non-Zero elements of the transition matrix
     probabilities = transition_prob(system(problem))
     num_transitions = nnz(upper(probabilities))
 
-    res_bmdp_tool = benchmark_bmdp_tool(model, problem)
-    res_prism = benchmark_prism(model, problem)
-    res_intervalmdp_cpu = benchmark_intervalmdp_cpu(problem)
-    res_intervalmdp_gpu = benchmark_intervalmdp_gpu(problem)
+    return num_transitions
+end
+
+function benchmark_model(model)
+    res_bmdp_tool = benchmark_bmdp_tool(model)
+    res_prism = benchmark_prism(model)
+    res_intervalmdp_cpu = benchmark_intervalmdp_cpu(model)
+    res_intervalmdp_gpu = benchmark_intervalmdp_gpu(model)
+
+    num_transitions = read_num_transitions(model)
 
     return (model=model, num_transitions=num_transitions, bmdp_tool=res_bmdp_tool, prism=res_prism, intervalmdp_cpu=res_intervalmdp_cpu, intervalmdp_gpu=res_intervalmdp_gpu)
 end
@@ -181,7 +224,7 @@ function benchmark()
     models = [
         "pimdp_0",
         "pimdp_1",
-        "pimdp_2",
+        # "pimdp_2",
         "multiObj_robotIMDP",
         "linear/probability_data_5_f_0.9_sigma_[0.01]",
         "linear/probability_data_5_f_0.9_sigma_[0.05]",

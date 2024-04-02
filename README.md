@@ -8,12 +8,12 @@ Pkg.add("IntervalMDP")
 
 
 ## Hardware requirements
-- RAM: at least 16 GB
+- RAM: at least 24GB (required for PRISM)
 - GPU: NVIDIA GPU with CUDA support (tested on NVIDIA GeForce GTX 1060 6GB), at least 6GB VRAM
 
 
 ## Running instructions
-We have prepared a Docker image to build and run the experiments including the baseline. To build and run the experiments, excluding our GPU implmentation (see ["Running with NVIDIA GPU"](#running-with-nvidia-gpu)), please clone or copy the source code of [the reproducibility package](https://github.com/Zinoex/IntervalMDP.jl_ReproducibilityPackage) and execute the following two commands from a terminal in the root of the source directory:
+We have prepared a Docker image to build and run the experiments including the baseline. To build and run the experiments, excluding our GPU implementation (see ["Running with NVIDIA GPU"](#running-with-nvidia-gpu) to include the GPU implementation in the benchmark), please clone or copy the source code of [the reproducibility package](https://github.com/Zinoex/IntervalMDP.jl_ReproducibilityPackage) and execute the following two commands from a terminal in the root of the source directory:
 
 ```sh
 docker build -t intervalmdp-reproducibility-package .
