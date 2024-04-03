@@ -23,7 +23,7 @@ docker run --mount type=bind,source="$(pwd)"/results,target=/app/results interva
 
 Note: It may be necessary to execute Docker commands with `sudo` (default) unless the system has been configured to enable sudo-free Docker.
 
-The experiments will run for 6-8 hours, depending on the hardware. The resulting figures will be saved in the `results` directory in the root of the source directory. 
+The experiments will run for 8-10 hours, depending on the hardware. The resulting figures will be saved in the `results` directory in the root of the source directory. 
 
 ### Running with NVIDIA GPU
 To run the GPU accelerated code, the container must be run on a host computer with an NVIDIA GPU that has [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/1.14.5/install-guide.html) installed and configured for Docker (see more details about enabling CUDA for Docker at [Saturn Cloud's "How to Use GPUs from a Docker Container"](https://saturncloud.io/blog/how-to-use-gpu-from-a-docker-container-a-guide-for-data-scientists-and-software-engineers/)). If not running on a machine with an NVIDIA GPU and with the NVIDIA container toolkit correctly installed and configured, a warning is emitted and the GPU benchmark is skipped .
