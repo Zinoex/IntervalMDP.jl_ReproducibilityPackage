@@ -11,6 +11,7 @@ Pkg.add("IntervalMDP")
 - RAM: at least 24GB (required for PRISM)
 - GPU: NVIDIA GPU with CUDA support (tested on NVIDIA GeForce GTX 1060 6GB), at least 6GB VRAM
 
+If only 16GB of RAM is available, the benchmark can still be run by commenting out the `pimdp_1` and `pimdp_2` benchmark in the `benchmark.jl` file. The trends and conclusions should remain the same.
 
 ## Running instructions
 We have prepared a Docker image to build and run the experiments including the baseline. To build and run the experiments, excluding our GPU implementation (see ["Running with NVIDIA GPU"](#running-with-nvidia-gpu) to include the GPU implementation in the benchmark), please clone or copy the source code of [the reproducibility package](https://github.com/Zinoex/IntervalMDP.jl_ReproducibilityPackage) and execute the following two commands from a terminal in the root of the source directory:

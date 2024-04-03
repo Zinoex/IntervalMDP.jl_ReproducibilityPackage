@@ -224,7 +224,7 @@ function benchmark()
     models = [
         "pimdp_0",
         "pimdp_1",
-        # "pimdp_2",
+        "pimdp_2",
         "multiObj_robotIMDP",
         "linear/probability_data_5_f_0.9_sigma_[0.01]",
         "linear/probability_data_5_f_0.9_sigma_[0.05]",
