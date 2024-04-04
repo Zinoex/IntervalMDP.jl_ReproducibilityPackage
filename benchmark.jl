@@ -125,7 +125,7 @@ function benchmark_prism(model; samples=10000, timeout_seconds=5.0)
     prop = read(pctl_path, String)
 
     prism_path = joinpath(base_path, model * ".all")
-    prism_cmd = `$(@__DIR__)/prism-4.8.1-linux64-x86/bin/prism -javamaxmem 16g -importmodel $prism_path -pctl $prop`
+    prism_cmd = `$(@__DIR__)/prism-4.8.1-linux64-x86/bin/prism -javamaxmem 8g -importmodel $prism_path -pctl $prop`
 
     # Execution statistics
     execution_times = Float64[]
